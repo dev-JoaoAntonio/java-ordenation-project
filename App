@@ -93,7 +93,7 @@ public class App {
                         model_ordenacao.addColumn("Nome da Imagem");
                         model_ordenacao.addColumn("Tamanho da Imagem(Bytes)");
 
-                        String diretorio = "C:\\Users\\joaod\\OneDrive\\Desktop\\imagens";
+                        String diretorio = "path_to_the_image_folder";
 
                         File pasta = new File(diretorio);
                         File[] arquivos = pasta.listFiles();
@@ -207,7 +207,7 @@ public class App {
                 JOptionPane.showMessageDialog(null,
                         "Pressione em Start ao lado de 'Apache' e 'MySQL', apos isso pressione 'admin' ao lado de 'mySQL'");
                 try {
-                    String xamppExecutable = "D:\\XAMP\\xampp-control.exe";
+                    String xamppExecutable = "path_to_xampp_app";
                     ProcessBuilder pb = new ProcessBuilder(xamppExecutable);
                     pb.start();
                 } catch (Exception ee) {
@@ -228,7 +228,7 @@ public class App {
         ActionListener ouvidor_pasta = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    File diretorio = new File("C:\\Users\\joaod\\OneDrive\\Desktop\\imagens");
+                    File diretorio = new File("directory_path");
 
                     if (diretorio.exists()) {
                         Desktop.getDesktop().open(diretorio);
@@ -251,7 +251,7 @@ public class App {
                 String user = "root";
                 String password = "";
 
-                File imagemFile = new File("C:\\Users\\joaod\\OneDrive\\Desktop\\imagens\\" + txt_img.getText());
+                File imagemFile = new File("path_to_image_folder" + txt_img.getText());
 
                 try (Connection conn = DriverManager.getConnection(url, user, password)) {
                     String sql = "INSERT INTO imagensbd (nome, img) VALUES (?, ?)";
@@ -284,7 +284,7 @@ public class App {
                 String user = "root";
                 String password = "";
 
-                File imagemFile = new File("C:\\Users\\joaod\\OneDrive\\Desktop\\imagens\\" + txt_img.getText());
+                File imagemFile = new File("path_to_image_folder" + txt_img.getText());
 
                 try (Connection conn = DriverManager.getConnection(url, user, password)) {
                     String sql = "DELETE FROM imagensbd WHERE nome = ?";
