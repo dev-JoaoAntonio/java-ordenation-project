@@ -1,0 +1,348 @@
+package Program;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.io.*;
+import java.util.List;
+
+public class App {
+
+    // Linear
+    public static int[] linearSort(int[] arr, int maxRange) {
+        int[] countArray = new int[maxRange + 1];
+        for (int i = 0; i <= maxRange; i++) {
+            countArray[i] = 0;
+        }
+        for (int num : arr) {
+            countArray[num]++;
+        }
+        int index = 0;
+        for (int i = 0; i <= maxRange; i++) {
+            while (countArray[i] > 0) {
+                arr[index] = i;
+                index++;
+                countArray[i]--;
+            }
+        }
+
+        return arr;
+    }
+
+    JFrame frame;
+    JButton calcular_bt, sair_bt, bd_bt, img_bt;
+    JFrame frame_img = new JFrame();
+    JLabel imagemLabel = new JLabel();
+    long TempoInicioBubble;
+    long TempoFinalBubble;
+    long TempoInicioSelection;
+    long TempoFinalSelection;
+    long TempoInicioLinear;
+    long TempoFinalLinear;
+
+    public App() {
+        frame = new JFrame("APS");
+        calcular_bt = new JButton("Calcular");
+        sair_bt = new JButton("Sair");
+        bd_bt = new JButton("Acessar banco de dados");
+        img_bt = new JButton("Inserir imagens");
+
+        frame.setLayout(new FlowLayout());
+        frame.add(calcular_bt);
+        frame.add(bd_bt);
+        frame.add(sair_bt);
+        frame.add(img_bt);
+
+        frame.setVisible(true);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(300, 150);
+
+        ActionListener ouvidor_calcular = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFrame frame_calculo = new JFrame("Tempo Gasto Para Cada Ordenacao");
+                JTable table;
+                DefaultTableModel modelo;
+                frame_calculo.setSize(500, 200);
+                frame_calculo.setLocationRelativeTo(null);
+
+                modelo = new DefaultTableModel();
+                modelo.addColumn("Ordenacao por Bolha");
+                modelo.addColumn("Ordenacao Linear");
+                modelo.addColumn("Ordenacao por Selecao");
+
+                table = new JTable(modelo);
+
+                JPanel painel = new JPanel();
+
+                JButton exibir_bt = new JButton("Calcular");
+
+                painel.add(exibir_bt);
+
+                ActionListener ouvidor_exibir = new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        JFrame frame_ordenacao = new JFrame("");
+                        frame_ordenacao.setSize(600, 600);
+
+                        DefaultTableModel model_ordenacao = new DefaultTableModel();
+                        JTable table_ordenacao = new JTable(model_ordenacao);
+
+                        model_ordenacao.addColumn("Nome da Imagem");
+                        model_ordenacao.addColumn("Tamanho da Imagem(Bytes)");
+
+                        String diretorio = "C:\\Users\\joaod\\OneDrive\\Desktop\\imagens";
+
+                        File pasta = new File(diretorio);
+                        File[] arquivos = pasta.listFiles();
+
+                        if (arquivos != null) {
+                            List<Arquivo> listaArquivos = new ArrayList<>();
+
+                            for (File file : arquivos) {
+                                if (file.isFile()) {
+                                    listaArquivos.add(new Arquivo(file.getName(), file.length()));
+                                }
+                            }
+
+                            TempoInicioBubble = System.currentTimeMillis();
+                            // Ordenação por bolha
+                            int n = listaArquivos.size();
+                            for (int i = 0; i < n - 1; i++) {
+                                for (int j = 0; j < n - i - 1; j++) {
+                                    if (listaArquivos.get(j).getTamanho() > listaArquivos.get(j + 1).getTamanho()) {
+                                        // Troca os elementos
+                                        Arquivo temp = listaArquivos.get(j);
+                                        listaArquivos.set(j, listaArquivos.get(j + 1));
+                                        listaArquivos.set(j + 1, temp);
+                                    }
+                                }
+                            }
+                            TempoFinalBubble = System.currentTimeMillis();
+
+                            TempoInicioSelection = System.currentTimeMillis();
+                            // SelectionSort
+                            for (int i = 0; i < n - 1; i++) {
+                                int minIndex = i;
+                                for (int j = i + 1; j < n; j++) {
+                                    if (listaArquivos.get(j).getTamanho() < listaArquivos.get(minIndex).getTamanho()) {
+                                        minIndex = j;
+                                    }
+                                }
+                                // Troca os elementos
+                                Arquivo temp = listaArquivos.get(minIndex);
+                                listaArquivos.set(minIndex, listaArquivos.get(i));
+                                listaArquivos.set(i, temp);
+                            }
+                            TempoFinalSelection = System.currentTimeMillis();
+
+                            TempoInicioLinear = System.currentTimeMillis();
+                            // LinearSort
+                            int maxTamanho = 0;
+                            for (Arquivo arquivo : listaArquivos) {
+                                if (arquivo.getTamanho() > maxTamanho) {
+                                    maxTamanho = (int) arquivo.getTamanho();
+                                }
+                            }
+
+                            int[] countArray = new int[maxTamanho + 1];
+                            for (Arquivo arquivo : listaArquivos) {
+                                countArray[(int) arquivo.getTamanho()]++;
+                            }
+
+                            int index = 0;
+                            for (int i = 0; i <= maxTamanho; i++) {
+                                while (countArray[i] > 0) {
+                                    for (Arquivo arquivo : listaArquivos) {
+                                        if (arquivo.getTamanho() == i) {
+                                            listaArquivos.set(index, arquivo);
+                                            index++;
+                                        }
+                                    }
+                                    countArray[i]--;
+                                }
+                            }
+                            TempoFinalLinear = System.currentTimeMillis();
+
+                            for (Arquivo arquivo : listaArquivos) {
+                                model_ordenacao.addRow(new Object[] { arquivo.getNome(), arquivo.getTamanho() });
+                            }
+                        }
+
+                        JScrollPane scrollPane = new JScrollPane(table_ordenacao);
+                        frame_ordenacao.add(scrollPane);
+                        frame_ordenacao.setVisible(true);
+
+                        // Tempo ordenacao Bolha
+                        long TempoTotalBubble = TempoFinalBubble - TempoInicioBubble;
+
+                        // Tempo ordenacao Selection
+                        long TempoTotalSelection = TempoFinalSelection - TempoInicioSelection;
+
+                        // Tempo ordenacao Linear
+                        long TempoTotalLinear = TempoFinalLinear - TempoInicioLinear;
+
+                        modelo.addRow(new Object[] { "0.0" + TempoTotalBubble + " ms", "0.0" + TempoTotalLinear + " ms",
+                                "0.0" + TempoTotalSelection + " ms" });
+
+                    }
+                };
+
+                exibir_bt.addActionListener(ouvidor_exibir);
+
+                painel.setLayout(new FlowLayout());
+
+                frame_calculo.getContentPane().add(new JScrollPane(table));
+                frame_calculo.setLayout(new BorderLayout());
+                frame_calculo.add(new JScrollPane(table));
+                frame_calculo.add(painel, BorderLayout.SOUTH);
+                frame_calculo.setVisible(true);
+            }
+        };
+
+        ActionListener ouvidor_bd = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null,
+                        "Pressione em Start ao lado de 'Apache' e 'MySQL', apos isso pressione 'admin' ao lado de 'mySQL'");
+                try {
+                    String xamppExecutable = "D:\\XAMP\\xampp-control.exe";
+                    ProcessBuilder pb = new ProcessBuilder(xamppExecutable);
+                    pb.start();
+                } catch (Exception ee) {
+                    ee.printStackTrace();
+                }
+
+            }
+        };
+
+        JLabel perg_img = new JLabel(
+                "Digite o nome da imagem que deseja inserir, seguindo o padrao 'hora_minuto.jpg'");
+        JTextField txt_img = new JTextField("", 10);
+        JButton bt_upload = new JButton("Inserir");
+        JButton bt_pasta = new JButton("Abrir Diretorio");
+        JButton bt_deletar = new JButton("Deletar");
+
+        // Abre o diretorio com as imagens
+        ActionListener ouvidor_pasta = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    File diretorio = new File("C:\\Users\\joaod\\OneDrive\\Desktop\\imagens");
+
+                    if (diretorio.exists()) {
+                        Desktop.getDesktop().open(diretorio);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "O diretório não existe.");
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Erro ao abrir o diretório.");
+                }
+            }
+        };
+
+        // Realiza o upload da imagem e a conexao com o banco de dados ao apertar o
+        // botao Upload
+        ActionListener ouvidor_upload = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Faz a conexao com o banco de dados
+                String url = "jdbc:mysql://localhost:3306/imagens";
+                String user = "root";
+                String password = "";
+
+                File imagemFile = new File("C:\\Users\\joaod\\OneDrive\\Desktop\\imagens\\" + txt_img.getText());
+
+                try (Connection conn = DriverManager.getConnection(url, user, password)) {
+                    String sql = "INSERT INTO imagensbd (nome, img) VALUES (?, ?)";
+
+                    try (FileInputStream fis = new FileInputStream(imagemFile);
+                            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                        pstmt.setString(1, txt_img.getText());
+                        pstmt.setBinaryStream(2, fis, (int) imagemFile.length());
+                        pstmt.executeUpdate();
+                        txt_img.setText("");
+                        JOptionPane.showMessageDialog(null, "O upload foi concluido com sucesso!");
+
+                        // exibindo a imagem
+                        ImageIcon imagemIcon = new ImageIcon(imagemFile.getAbsolutePath());
+                        imagemLabel.setIcon(imagemIcon);
+                    }
+                } catch (SQLException | java.io.IOException ee) {
+                    JOptionPane.showMessageDialog(null,
+                            "Ocorreu um erro ao realizar o upload! Verifique o nome do arquivo");
+                    ee.printStackTrace();
+                }
+            }
+        };
+
+        ActionListener ouvidor_deletar = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Faz a conexao com o banco de dados
+                String url = "jdbc:mysql://localhost:3306/imagens";
+                String user = "root";
+                String password = "";
+
+                File imagemFile = new File("C:\\Users\\joaod\\OneDrive\\Desktop\\imagens\\" + txt_img.getText());
+
+                try (Connection conn = DriverManager.getConnection(url, user, password)) {
+                    String sql = "DELETE FROM imagensbd WHERE nome = ?";
+
+                    try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                        pstmt.setString(1, txt_img.getText());
+                        pstmt.executeUpdate();
+                        txt_img.setText("");
+                        JOptionPane.showMessageDialog(null, "A exclusao foi concluida com sucesso!");
+
+                        // exibindo a imagem
+                        ImageIcon imagemIcon = new ImageIcon(imagemFile.getAbsolutePath());
+                        imagemLabel.setIcon(imagemIcon);
+                    }
+                } catch (SQLException ee) {
+                    JOptionPane.showMessageDialog(null,
+                            "Ocorreu um erro ao realizar a exclusao! Verifique o nome do arquivo");
+                    ee.printStackTrace();
+                }
+            }
+        };
+
+        ActionListener ouvidor_img = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                frame_img.setLayout(new FlowLayout());
+                frame_img.add(perg_img);
+                frame_img.add(txt_img);
+                frame_img.add(bt_upload);
+                frame_img.add(bt_deletar);
+                frame_img.add(bt_pasta);
+                frame_img.add(imagemLabel);
+
+                frame_img.setVisible(true);
+                frame_img.setSize(900, 900);
+                frame_img.setLocationRelativeTo(null);
+
+            }
+        };
+
+        ActionListener ouvidor_sair = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        };
+
+        bt_pasta.addActionListener(ouvidor_pasta);
+        bt_upload.addActionListener(ouvidor_upload);
+        bt_deletar.addActionListener(ouvidor_deletar);
+        img_bt.addActionListener(ouvidor_img);
+        sair_bt.addActionListener(ouvidor_sair);
+        bd_bt.addActionListener(ouvidor_bd);
+        calcular_bt.addActionListener(ouvidor_calcular);
+
+    }
+
+    public static void main(String[] args) {
+        new App();
+
+    }
+}
